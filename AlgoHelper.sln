@@ -1,0 +1,44 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31313.79
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AlgoHelperFramework", "AlgoHelperFramework\AlgoHelperFramework.vcxproj", "{777E6AD5-42FA-4660-BD2B-74DADE4DFE18}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C8EAC270-6E43-4657-BE3F-267125BCD97B} = {C8EAC270-6E43-4657-BE3F-267125BCD97B}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Algorithm", "Algorithm\Algorithm.vcxproj", "{C8EAC270-6E43-4657-BE3F-267125BCD97B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{777E6AD5-42FA-4660-BD2B-74DADE4DFE18}.Debug|x64.ActiveCfg = Debug|x64
+		{777E6AD5-42FA-4660-BD2B-74DADE4DFE18}.Debug|x64.Build.0 = Debug|x64
+		{777E6AD5-42FA-4660-BD2B-74DADE4DFE18}.Debug|x86.ActiveCfg = Debug|Win32
+		{777E6AD5-42FA-4660-BD2B-74DADE4DFE18}.Debug|x86.Build.0 = Debug|Win32
+		{777E6AD5-42FA-4660-BD2B-74DADE4DFE18}.Release|x64.ActiveCfg = Release|x64
+		{777E6AD5-42FA-4660-BD2B-74DADE4DFE18}.Release|x64.Build.0 = Release|x64
+		{777E6AD5-42FA-4660-BD2B-74DADE4DFE18}.Release|x86.ActiveCfg = Release|Win32
+		{777E6AD5-42FA-4660-BD2B-74DADE4DFE18}.Release|x86.Build.0 = Release|Win32
+		{C8EAC270-6E43-4657-BE3F-267125BCD97B}.Debug|x64.ActiveCfg = Debug|x64
+		{C8EAC270-6E43-4657-BE3F-267125BCD97B}.Debug|x64.Build.0 = Debug|x64
+		{C8EAC270-6E43-4657-BE3F-267125BCD97B}.Debug|x86.ActiveCfg = Debug|Win32
+		{C8EAC270-6E43-4657-BE3F-267125BCD97B}.Debug|x86.Build.0 = Debug|Win32
+		{C8EAC270-6E43-4657-BE3F-267125BCD97B}.Release|x64.ActiveCfg = Release|x64
+		{C8EAC270-6E43-4657-BE3F-267125BCD97B}.Release|x64.Build.0 = Release|x64
+		{C8EAC270-6E43-4657-BE3F-267125BCD97B}.Release|x86.ActiveCfg = Release|Win32
+		{C8EAC270-6E43-4657-BE3F-267125BCD97B}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {459B2047-CC4C-491E-99D4-523BCD893596}
+	EndGlobalSection
+EndGlobal
