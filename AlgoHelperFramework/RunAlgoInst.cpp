@@ -28,7 +28,9 @@ RUN_ALGO_INSTANCE::RUN_ALGO_INSTANCE(
     m_hPipeInRead(NULL),
     m_hPipeInWrite(NULL),
     m_OutputText("")
-{ ; }
+{
+    ;
+}
 
 RUN_ALGO_INSTANCE::~RUN_ALGO_INSTANCE()
 {
@@ -43,16 +45,16 @@ RUN_ALGO_INSTANCE::~RUN_ALGO_INSTANCE()
 
     if (m_hDll) FreeLibrary(m_hDll);
 }
-unsigned __stdcall RunAlgoFuncThread(void *lpfnAlgo)
+unsigned __stdcall RunAlgoFuncThread(void* lpfnAlgo)
 {
     ALGORITHM_FUNC FuncAddr = (ALGORITHM_FUNC)lpfnAlgo;
     FuncAddr();
     return 0;
 }
 
-unsigned __stdcall IoWriteThread(void *pRunAlgoInstance)
+unsigned __stdcall IoWriteThread(void* pRunAlgoInstance)
 {
-    RUN_ALGO_INSTANCE * pRunAlgoInst = (RUN_ALGO_INSTANCE *)pRunAlgoInstance;
+    RUN_ALGO_INSTANCE* pRunAlgoInst = (RUN_ALGO_INSTANCE*)pRunAlgoInstance;
     LPSTR lpInput = NULL;
     __try
     {// convert the string to current used codepage, and write it through the pipe.
@@ -93,13 +95,13 @@ unsigned __stdcall IoWriteThread(void *pRunAlgoInstance)
             HeapFree(GetProcessHeap(), 0, (LPVOID)lpInput);
         }
     }
-    
+
     return 0;
 }
 
-unsigned __stdcall IoReadThread(void *pRunAlgoInstance)
+unsigned __stdcall IoReadThread(void* pRunAlgoInstance)
 {
-    RUN_ALGO_INSTANCE *pRunAlgoInst = (RUN_ALGO_INSTANCE *)pRunAlgoInstance;
+    RUN_ALGO_INSTANCE* pRunAlgoInst = (RUN_ALGO_INSTANCE*)pRunAlgoInstance;
 
     BYTE ReadBuffer[4096];
     while (1)
@@ -115,7 +117,7 @@ unsigned __stdcall IoReadThread(void *pRunAlgoInstance)
         if (pRunAlgoInst->m_bPrintToScreen)
         {
             DWORD cchWritten;
-            ConsoleIOWriteWithAttribute((LPCSTR)ReadBuffer, dwBytesRead, &cchWritten, 0xF0, FOREGROUND_RED);
+            ConAttrWriteA((LPCSTR)ReadBuffer, dwBytesRead, &cchWritten, 0xF0, FOREGROUND_RED);
         }
     }
     return 0;
@@ -184,16 +186,16 @@ BOOL RUN_ALGO_INSTANCE::Start(LPCSTR lpFuncName)
             __leave;
 
         // Create Threads in order to run algorithm thread and IO with that thread.
-        m_hThreadRunAlgo = (HANDLE)_beginthreadex(NULL, 0, RunAlgoFuncThread, (void *)FuncAddr, 0, NULL);
+        m_hThreadRunAlgo = (HANDLE)_beginthreadex(NULL, 0, RunAlgoFuncThread, (void*)FuncAddr, 0, NULL);
         if (m_hThreadRunAlgo == INVALID_HANDLE_VALUE)
             __leave;
         if (m_bRedirectInput)
         {
-            m_hThreadWrite = (HANDLE)_beginthreadex(NULL, 0, IoWriteThread, (void *)this, 0, NULL);
+            m_hThreadWrite = (HANDLE)_beginthreadex(NULL, 0, IoWriteThread, (void*)this, 0, NULL);
             if (m_hThreadWrite == INVALID_HANDLE_VALUE)
                 __leave;
         }
-        m_hThreadRead = (HANDLE)_beginthreadex(NULL, 0, IoReadThread, (void *)this, 0, NULL);
+        m_hThreadRead = (HANDLE)_beginthreadex(NULL, 0, IoReadThread, (void*)this, 0, NULL);
         if (m_hThreadRead == INVALID_HANDLE_VALUE)
             __leave;
 
@@ -223,7 +225,7 @@ BOOL RUN_ALGO_INSTANCE::Start(LPCSTR lpFuncName)
             }
         }
     }
-    
+
     return bSuccess;
 }
 
@@ -258,3 +260,39 @@ BOOL RUN_ALGO_INSTANCE::Wait()
 
     return TRUE;
 }
+
+DWORD64 FileTime2Millisecond(const FILETIME& ft)
+{
+    LARGE_INTEGER li;
+    li.HighPart = ft.dwHighDateTime;
+    li.LowPart = ft.dwLowDateTime;
+    return li.QuadPart / 10000;
+}
+
+BOOL RUN_ALGO_INSTANCE::GetRunningTime(
+    DWORD64& RunningTimems,
+    DWORD64& KernelTimems,
+    DWORD64& UserTimems,
+    DWORD64& CycleTime)
+{
+    if (!m_hThreadRunAlgo) return FALSE;
+
+    if (WaitForSingleObject(m_hThreadRunAlgo, 0) == WAIT_OBJECT_0)
+    {
+        FILETIME ftCreation, ftExit, ftKernel, ftUser;
+        if (!GetThreadTimes(m_hThreadRunAlgo, &ftCreation, &ftExit, &ftKernel, &ftUser))
+            return FALSE;
+
+        DWORD64 ulCycleTime;
+        if (!QueryThreadCycleTime(m_hThreadRunAlgo, &ulCycleTime))
+            return FALSE;
+
+        RunningTimems = FileTime2Millisecond(ftExit) - FileTime2Millisecond(ftCreation);
+        KernelTimems = FileTime2Millisecond(ftKernel);
+        UserTimems = FileTime2Millisecond(ftUser);
+        CycleTime = ulCycleTime;
+        return TRUE;
+    }
+    return FALSE;
+}
+

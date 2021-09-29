@@ -1,24 +1,31 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #define _CRT_SECURE_NO_WARNINGS
 
+#ifdef __cplusplus
 #include <cstdio>
-#include <Windows.h>
-#pragma comment(linker, "/EXPORT:_main")
+extern "C" {
+#else
+#include <stdio.h>
+#endif
+
+
+#ifdef RUN_LOCALLY
+#include "darkmagic_header.h"
+#else
+#endif
 
 
 int main()
 {
+#ifdef RUN_LOCALLY
     setvbuf(stdout, NULL, _IONBF, 0);
+#endif
 
-    char str[100];
-    scanf("%s", str);
-    printf("hello, dll %s\n", str);
+
+
 }
+
 
 #ifdef __cplusplus
 }
-
 #endif

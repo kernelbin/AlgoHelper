@@ -17,7 +17,7 @@ struct RUN_ALGO_INSTANCE
     HANDLE m_hThreadRunAlgo;
     HANDLE m_hThreadWrite;
     HANDLE m_hThreadRead;
-    
+
     HANDLE m_hPipeOutRead, m_hPipeOutWrite, m_hPipeInRead, m_hPipeInWrite;
 
     ATL::CStringA m_OutputText;
@@ -28,6 +28,12 @@ struct RUN_ALGO_INSTANCE
     BOOL Start(LPCSTR lpFuncName);
     BOOL ForceStop();
     BOOL Wait();
+
+    BOOL GetRunningTime(
+        DWORD64& RunningTimems,
+        DWORD64& KernelTimems,
+        DWORD64& UserTimems,
+        DWORD64& CycleTime);
 
     ~RUN_ALGO_INSTANCE();
 };
