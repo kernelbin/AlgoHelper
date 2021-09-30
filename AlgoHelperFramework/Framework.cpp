@@ -35,7 +35,7 @@ int main()
         test->GetRunningTime(TotalTime, KernelTime, UserTime, CpuCycle);
 
         ConAttrPrintfA(0xFF, 0, "\n");
-        ConAttrPrintfA(0x00, BACKGROUND_GREEN | BACKGROUND_BLUE,
+        ConAttrPrintfA(0x00, BACKGROUND_BLUE | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY,
             "  执行结束 总用时 %lld ms  用户态 %lld ms  内核态 %lld ms  CPU周期 %lld  ", TotalTime, UserTime, KernelTime, CpuCycle);
         ConAttrPrintfA(0xFF, 0, "\n");
         delete test;
