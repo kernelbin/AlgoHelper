@@ -9,7 +9,9 @@ This project does not contain a bunch of off-the-shelf algorithm code, but some 
 
 - Show the time your algorithm cost.
 
-- Debug macros `D`. Just use it like printf, it will only output text locally with another dolor.
+- Auto re-run your algorithm without restart the process. All data will be reset, no need memset anything.
+ 
+- Debug macro `D`. It will only output text locally with another color.
 
 - Show a red `'$'` when there's no `'\n'` at the end of output.
 
@@ -24,7 +26,9 @@ This project does not contain a bunch of off-the-shelf algorithm code, but some 
 
 ## How to use
 Just clone or download this repo, open the project in Visual Studio and open the `main.c` under project `Algorithm`, writing your code in the `main` function as usual.
-Then click run. (Ensure that AlgoHelperFramework is the project you start)
+Then click run. (Ensure that AlgoHelperFramework is the project you start).
+
+It will run your algorithm repeatedly, once the time cost is displayed, input next testcase directly.
 
 ## TODO
 - Enable you to run multiple testcase automatically and show the compare result.
