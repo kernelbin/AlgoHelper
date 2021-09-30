@@ -2,6 +2,18 @@
 #include <cstdarg>
 #include <cstdio>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#ifdef _X86_
+#define EXORTFUNC(f) __pragma(comment(linker, "/EXPORT:_" #f))
+#elif defined(_AMD64_) || defined(_IA64_)
+#define EXORTFUNC(f) __pragma(comment(linker, "/EXPORT:" #f))
+#else
+#error unsuportted architecture
+#endif
+
 BOOL ConAttrWriteA(LPCSTR lpString, DWORD cchString, LPDWORD lpcchWritten, WORD wOldAttrMask, WORD wAttributes)
 {
     if (!lpString)
@@ -24,6 +36,8 @@ BOOL ConAttrWriteA(LPCSTR lpString, DWORD cchString, LPDWORD lpcchWritten, WORD 
 
     return bRet;
 }
+
+EXORTFUNC(ConAttrPrintfA)
 
 BOOL ConAttrPrintfA(WORD wOldAttrMask, WORD wAttributes, LPCSTR lpFormat, ...)
 {
@@ -59,3 +73,8 @@ BOOL ConAttrPrintfA(WORD wOldAttrMask, WORD wAttributes, LPCSTR lpFormat, ...)
     }
     return bSuccess;
 }
+
+
+#ifdef __cplusplus
+}
+#endif

@@ -1,9 +1,9 @@
 #include <Windows.h>
 #include <process.h>
+#include <cstdlib>
 
 #include "RunAlgoInst.h"
 #include "ConsoleIO.h"
-
 
 #define CloseHandleNullIf(x) if(x) { CloseHandle(x); x = NULL; }
 #define PIPE_SIZE 4096
@@ -101,23 +101,39 @@ unsigned __stdcall IoWriteThread(void* pRunAlgoInstance)
 
 unsigned __stdcall IoReadThread(void* pRunAlgoInstance)
 {
+    // TODO: error logging for this entire function
     RUN_ALGO_INSTANCE* pRunAlgoInst = (RUN_ALGO_INSTANCE*)pRunAlgoInstance;
 
     BYTE ReadBuffer[4096];
     while (1)
     {
-        DWORD dwBytesRead;
-        BOOL bRet = ReadFile(pRunAlgoInst->m_hPipeOutRead, ReadBuffer, _countof(ReadBuffer), &dwBytesRead, NULL);
-        if (bRet && dwBytesRead == 0) // all read.
-            break;
+        // peek the pipe first, write the content to console, then read it.
+        // so we can ensure that the write end won't return before we write it.
+        DWORD dwBytesPeek, dwTotal, dwLeft;
+        BOOL bRet = PeekNamedPipe(pRunAlgoInst->m_hPipeOutRead, ReadBuffer, _countof(ReadBuffer), &dwBytesPeek, &dwTotal, &dwLeft);
+        if (bRet && dwBytesPeek == 0) // no data to read. try later.
+        {
+            Sleep(10); // TODO: seriously? spinning???
+            continue;
+        }
         if (!bRet) // failed
             break;
 
-        pRunAlgoInst->m_OutputText.Append((LPCSTR)ReadBuffer, dwBytesRead);
+        pRunAlgoInst->m_OutputText.Append((LPCSTR)ReadBuffer, dwBytesPeek);
         if (pRunAlgoInst->m_bPrintToScreen)
         {
             DWORD cchWritten;
-            ConAttrWriteA((LPCSTR)ReadBuffer, dwBytesRead, &cchWritten, 0xF0, FOREGROUND_RED);
+            ConAttrWriteA((LPCSTR)ReadBuffer, dwBytesPeek, &cchWritten, 0xF0, FOREGROUND_BLUE | FOREGROUND_INTENSITY);
+        }
+
+        DWORD dwBytesRead;
+        bRet = ReadFile(pRunAlgoInst->m_hPipeOutRead, ReadBuffer, dwBytesPeek, &dwBytesRead, NULL);
+        if (!bRet) // failed
+            break;
+        if (dwBytesPeek != dwBytesRead)
+        {
+            // something's wrong. no idea what's happened.
+            break;
         }
     }
     return 0;
