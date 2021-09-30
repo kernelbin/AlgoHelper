@@ -1,4 +1,4 @@
-#define _CRT_SECURE_NO_WARNINGS
+ï»¿#define _CRT_SECURE_NO_WARNINGS
 
 #include <Windows.h>
 #include <AtlStr.h>
@@ -25,12 +25,18 @@ int main()
             break;
         }
         test->Wait();
+        
+        int cchOutputLen = test->m_OutputText.GetLength();
+        if (cchOutputLen && test->m_OutputText[cchOutputLen - 1] != '\n')
+        {
+            ConAttrPrintfA(0xF0, FOREGROUND_RED, "$\n");
+        }
         DWORD64 TotalTime, UserTime, KernelTime, CpuCycle;
         test->GetRunningTime(TotalTime, KernelTime, UserTime, CpuCycle);
 
         ConAttrPrintfA(0xFF, 0, "\n");
-        ConAttrPrintfA(0x00, BACKGROUND_BLUE | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE,
-            "  Ö´ĞĞ½áÊø ×ÜÓÃÊ± %lld ms  ÓÃ»§Ì¬ %lld ms  ÄÚºËÌ¬ %lld ms  CPUÖÜÆÚ %lld  ", TotalTime, UserTime, KernelTime, CpuCycle);
+        ConAttrPrintfA(0x00, BACKGROUND_GREEN | BACKGROUND_BLUE,
+            "  æ‰§è¡Œç»“æŸ æ€»ç”¨æ—¶ %lld ms  ç”¨æˆ·æ€ %lld ms  å†…æ ¸æ€ %lld ms  CPUå‘¨æœŸ %lld  ", TotalTime, UserTime, KernelTime, CpuCycle);
         ConAttrPrintfA(0xFF, 0, "\n");
         delete test;
     }

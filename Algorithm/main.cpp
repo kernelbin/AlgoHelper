@@ -59,7 +59,10 @@ typedef long long ll, LL; typedef unsigned long long ull, ULL;
 
 int main()
 {
-    
+    int x;
+    scanf("%d", &x);
+    printf("hello world! %d", x);
+    return 0;
 }
 
 #pragma warning(pop)
