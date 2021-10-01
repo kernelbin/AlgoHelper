@@ -16,21 +16,25 @@
 EXORTFUNC(main)
 
 // defines for debugging
-#define D(Format, ...) if (fnConAttrPrintfA) fnConAttrPrintfA(0xF0, FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_INTENSITY, Format, __VA_ARGS__);
-#define DR(Format, ...) if (fnConAttrPrintfA) fnConAttrPrintfA(0xF0, FOREGROUND_RED | FOREGROUND_INTENSITY, Format, __VA_ARGS__);
-#define DG(Format, ...) if (fnConAttrPrintfA) fnConAttrPrintfA(0xF0, FOREGROUND_GREEN | FOREGROUND_INTENSITY, Format, __VA_ARGS__);
-#define DB(Format, ...) if (fnConAttrPrintfA) fnConAttrPrintfA(0xF0, FOREGROUND_BLUE | FOREGROUND_INTENSITY, Format, __VA_ARGS__);
-#define DYL(Format, ...) if (fnConAttrPrintfA) fnConAttrPrintfA(0xF0, FOREGROUND_RED | FOREGROUND_GREEN, Format, __VA_ARGS__);
+#define D(Format, ...) if (fnConAttrPrintfA)   { FlushFileBuffers(hStdRedirectOut); fnConAttrPrintfA(0xF0, FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_INTENSITY, Format, __VA_ARGS__); }
+#define DR(Format, ...) if (fnConAttrPrintfA)  { FlushFileBuffers(hStdRedirectOut); fnConAttrPrintfA(0xF0, FOREGROUND_RED | FOREGROUND_INTENSITY, Format, __VA_ARGS__); }
+#define DG(Format, ...) if (fnConAttrPrintfA)  { FlushFileBuffers(hStdRedirectOut); fnConAttrPrintfA(0xF0, FOREGROUND_GREEN | FOREGROUND_INTENSITY, Format, __VA_ARGS__); }
+#define DB(Format, ...) if (fnConAttrPrintfA)  { FlushFileBuffers(hStdRedirectOut); fnConAttrPrintfA(0xF0, FOREGROUND_BLUE | FOREGROUND_INTENSITY, Format, __VA_ARGS__); }
+#define DYL(Format, ...) if (fnConAttrPrintfA) { FlushFileBuffers(hStdRedirectOut); fnConAttrPrintfA(0xF0, FOREGROUND_RED | FOREGROUND_GREEN, Format, __VA_ARGS__); }
 #define BKIF(x) { if(x) DebugBreak(); }
 
 
 
 BOOL(*fnConAttrPrintfA)(WORD, WORD, LPCSTR, ...) = NULL;
 
+HANDLE hStdRedirectOut = NULL;
+
 void BeforeMain()
 {
     setvbuf(stdout, NULL, _IONBF, 0);
     fnConAttrPrintfA = (BOOL(*)(WORD, WORD, LPCSTR, ...))GetProcAddress(GetModuleHandle(0), "ConAttrPrintfA");
+    hStdRedirectOut = GetStdHandle(STD_OUTPUT_HANDLE);
+
     return;
 }
 
