@@ -10,6 +10,48 @@
 
 SRWLOCK DllLoaderLock = SRWLOCK_INIT;
 
+
+static BOOL CreateOneByteBlockNamedPipePair(PHANDLE hReadPipe, PHANDLE hWritePipe)
+{
+    WCHAR lpszPipename[120] = L"\\\\.\\pipe\\";
+    for (int i = 0; i < 32; i++)
+    {
+        lpszPipename[i + 9] = rand() % 26 + L'a';
+    }
+    (*hReadPipe) = CreateNamedPipeW(
+        lpszPipename,             // pipe name 
+        PIPE_ACCESS_INBOUND |      // read/write access 
+        0,     // overlapped mode 
+        PIPE_TYPE_BYTE |       // byte-type pipe 
+        PIPE_READMODE_BYTE |   // byte read mode 
+        PIPE_WAIT,                // blocking mode 
+        PIPE_UNLIMITED_INSTANCES, // unlimited instances 
+        0,    // output buffer size 
+        0,    // input buffer size 
+        0,             // client time-out 
+        NULL);
+    if ((!(*hReadPipe)) || ((*hReadPipe) == INVALID_HANDLE_VALUE))
+    {
+        (*hReadPipe) = (*hWritePipe) = 0;
+        return FALSE;
+    }
+    (*hWritePipe) = CreateFileW(lpszPipename, GENERIC_WRITE,
+        0,              // no sharing 
+        NULL,           // default security attributes
+        OPEN_EXISTING,  // opens existing pipe 
+        0,              // default attributes 
+        NULL);          // no template file 
+    if ((!(*hWritePipe)) || ((*hWritePipe) == INVALID_HANDLE_VALUE))
+    {
+        CloseHandle((*hReadPipe));
+        (*hReadPipe) = (*hWritePipe) = 0;
+        return FALSE;
+    }
+    return TRUE;
+}
+
+
+
 RUN_ALGO_INSTANCE::RUN_ALGO_INSTANCE(
     BOOL bPrintToScreen,
     BOOL bRedirectInput,
@@ -104,16 +146,19 @@ unsigned __stdcall IoReadThread(void* pRunAlgoInstance)
     // TODO: error logging for this entire function
     RUN_ALGO_INSTANCE* pRunAlgoInst = (RUN_ALGO_INSTANCE*)pRunAlgoInstance;
 
-    BYTE ReadBuffer[4096];
+    BYTE ReadBuffer[512];
     while (1)
     {
-        // peek the pipe first, write the content to console, then read it.
+        // First read 0 bytes from the pipe, in order to wait for data.
+        // After that, peek the pipe, write the content to console, then read it.
         // so we can ensure that the write end won't return before we write it.
+        DWORD dwZeroBytesRead;
+        if (!ReadFile(pRunAlgoInst->m_hPipeOutRead, ReadBuffer, 0, &dwZeroBytesRead, NULL))
+            break;
         DWORD dwBytesPeek, dwTotal, dwLeft;
         BOOL bRet = PeekNamedPipe(pRunAlgoInst->m_hPipeOutRead, ReadBuffer, _countof(ReadBuffer), &dwBytesPeek, &dwTotal, &dwLeft);
         if (bRet && dwBytesPeek == 0) // no data to read. try later.
         {
-            Sleep(10); // TODO: seriously? spinning???
             continue;
         }
         if (!bRet) // failed
@@ -150,7 +195,7 @@ BOOL RUN_ALGO_INSTANCE::Init()
     {
         // Create pipes and redirect input / output.
         // Output is always redirected, and input is redirected only if bRedirectInput.
-        if (!CreatePipe(&m_hPipeOutRead, &m_hPipeOutWrite, NULL, PIPE_SIZE))
+        if (!CreateOneByteBlockNamedPipePair(&m_hPipeOutRead, &m_hPipeOutWrite))
             __leave;
         if ((hOldStdOut = GetStdHandle(STD_OUTPUT_HANDLE)) == INVALID_HANDLE_VALUE) __leave;
         if (!SetStdHandle(STD_OUTPUT_HANDLE, m_hPipeOutWrite))
