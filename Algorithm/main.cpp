@@ -20,7 +20,6 @@
 #include <cstddef>
 #include <cassert>
 using namespace std;
-extern "C" {
 #else
 #include <stdio.h>
 #include <string.h>
@@ -56,22 +55,14 @@ typedef long long ll, LL; typedef unsigned long long ull, ULL;
 
 #pragma hdrstop
 
+#pragma GCC optimize("O2")
+#pragma GCC target("avx2")
 
 int main()
 {
-    int x;
-
-    scanf("%d", &x);
-    for (int i = 0; i < x; i++)
-    {
-        printf("hello world! %d", x);
-        D("qwqweqwq", x);
-    }
-    return 0;
+    int i;
+    scanf("%d", &i);
+    printf("%d", i);
 }
 
 #pragma warning(pop)
-
-#ifdef __cplusplus
-}
-#endif
